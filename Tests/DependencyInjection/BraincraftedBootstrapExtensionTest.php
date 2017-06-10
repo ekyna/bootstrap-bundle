@@ -28,6 +28,7 @@ class BraincraftedBootstrapExtensionTest extends \PHPUnit_Framework_TestCase
 
         $container = m::mock('Symfony\Component\DependencyInjection\ContainerBuilder');
         $container->shouldReceive('hasExtension')->andReturn(false);
+        $container->shouldReceive('fileExists')->andReturn(true);
         $container->shouldReceive('addResource');
         $container->shouldReceive('getParameterBag')->andReturn($bag);
         $container->shouldReceive('setDefinition');

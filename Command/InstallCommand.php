@@ -35,12 +35,20 @@ class InstallCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $destDir = $this->getDestDir();
-
         $finder = new Finder;
         $fs = new Filesystem;
 
+        $destDir = $this->getDestDir();
+        $root = realpath(
+            $this->getContainer()->getParameter('kernel.root_dir') .
+            DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR
+        );
+
         try {
+            if (0 !== strpos($destDir, $root)) {
+                throw new IOException("Specified directory is out of the project");
+            }
+
             $fs->mkdir($destDir);
         } catch (IOException $e) {
             $output->writeln(sprintf('<error>Could not create directory %s.</error>', $destDir));
@@ -101,6 +109,6 @@ class InstallCommand extends ContainerAwareCommand
      */
     protected function getDestDir()
     {
-        return $this->getContainer()->getParameter('braincrafted_bootstrap.fonts_dir');
+        return realpath($this->getContainer()->getParameter('braincrafted_bootstrap.fonts_dir'));
     }
 }

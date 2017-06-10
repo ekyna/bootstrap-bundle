@@ -26,6 +26,9 @@ class BootstrapFormExtension extends Twig_Extension
     private $style;
 
     /** @var string */
+    private $sizing = 'md';
+
+    /** @var string */
     private $colSize = 'lg';
 
     /** @var integer */
@@ -38,47 +41,49 @@ class BootstrapFormExtension extends Twig_Extension
     private $simpleCol = false;
 
     /** @var array */
-    private $settingsStack = array();
+    private $settingsStack = [];
 
     /**
      * {@inheritdoc}
      */
     public function getFunctions()
     {
-        return array(
-            new Twig_SimpleFunction('bootstrap_set_style', array($this, 'setStyle')),
-            new Twig_SimpleFunction('bootstrap_get_style', array($this, 'getStyle')),
-            new Twig_SimpleFunction('bootstrap_set_col_size', array($this, 'setColSize')),
-            new Twig_SimpleFunction('bootstrap_get_col_size', array($this, 'getColSize')),
-            new Twig_SimpleFunction('bootstrap_set_widget_col', array($this, 'setWidgetCol')),
-            new Twig_SimpleFunction('bootstrap_get_widget_col', array($this, 'getWidgetCol')),
-            new Twig_SimpleFunction('bootstrap_set_label_col', array($this, 'setLabelCol')),
-            new Twig_SimpleFunction('bootstrap_get_label_col', array($this, 'getLabelCol')),
-            new Twig_SimpleFunction('bootstrap_set_simple_col', array($this, 'setSimpleCol')),
-            new Twig_SimpleFunction('bootstrap_get_simple_col', array($this, 'getSimpleCol')),
-            new Twig_SimpleFunction('bootstrap_backup_form_settings', array($this, 'backupFormSettings')),
-            new Twig_SimpleFunction('bootstrap_restore_form_settings', array($this, 'restoreFormSettings')),
+        return [
+            new Twig_SimpleFunction('bootstrap_set_style', [$this, 'setStyle']),
+            new Twig_SimpleFunction('bootstrap_get_style', [$this, 'getStyle']),
+            new Twig_SimpleFunction('bootstrap_set_sizing', [$this, 'setSizing']),
+            new Twig_SimpleFunction('bootstrap_get_sizing', [$this, 'getSizing']),
+            new Twig_SimpleFunction('bootstrap_set_col_size', [$this, 'setColSize']),
+            new Twig_SimpleFunction('bootstrap_get_col_size', [$this, 'getColSize']),
+            new Twig_SimpleFunction('bootstrap_set_widget_col', [$this, 'setWidgetCol']),
+            new Twig_SimpleFunction('bootstrap_get_widget_col', [$this, 'getWidgetCol']),
+            new Twig_SimpleFunction('bootstrap_set_label_col', [$this, 'setLabelCol']),
+            new Twig_SimpleFunction('bootstrap_get_label_col', [$this, 'getLabelCol']),
+            new Twig_SimpleFunction('bootstrap_set_simple_col', [$this, 'setSimpleCol']),
+            new Twig_SimpleFunction('bootstrap_get_simple_col', [$this, 'getSimpleCol']),
+            new Twig_SimpleFunction('bootstrap_backup_form_settings', [$this, 'backupFormSettings']),
+            new Twig_SimpleFunction('bootstrap_restore_form_settings', [$this, 'restoreFormSettings']),
             new Twig_SimpleFunction(
                 'checkbox_row',
                 null,
-                array('is_safe' => array('html'), 'node_class' => 'Symfony\Bridge\Twig\Node\SearchAndRenderBlockNode')
+                ['is_safe' => ['html'], 'node_class' => 'Symfony\Bridge\Twig\Node\SearchAndRenderBlockNode']
             ),
             new Twig_SimpleFunction(
                 'radio_row',
                 null,
-                array('is_safe' => array('html'), 'node_class' => 'Symfony\Bridge\Twig\Node\SearchAndRenderBlockNode')
+                ['is_safe' => ['html'], 'node_class' => 'Symfony\Bridge\Twig\Node\SearchAndRenderBlockNode']
             ),
             new Twig_SimpleFunction(
                 'global_form_errors',
                 null,
-                array('is_safe' => array('html'), 'node_class' => 'Symfony\Bridge\Twig\Node\SearchAndRenderBlockNode')
+                ['is_safe' => ['html'], 'node_class' => 'Symfony\Bridge\Twig\Node\SearchAndRenderBlockNode']
             ),
             new Twig_SimpleFunction(
                 'form_control_static',
-                array($this, 'formControlStaticFunction'),
-                array('is_safe' => array('html'))
-            )
-        );
+                [$this, 'formControlStaticFunction'],
+                ['is_safe' => ['html']]
+            ),
+        ];
     }
 
     /**
@@ -107,6 +112,26 @@ class BootstrapFormExtension extends Twig_Extension
     public function getStyle()
     {
         return $this->style;
+    }
+
+    /**
+     * Sets the field and label sizing.
+     *
+     * @param string $sizing Field sizing (sm, md or lg)
+     */
+    public function setSizing($sizing)
+    {
+        $this->sizing = $sizing;
+    }
+
+    /**
+     * Returns the field and label sizing.
+     *
+     * @return string Field sizing (sm, md or lg)
+     */
+    public function getSizing()
+    {
+        return $this->sizing;
     }
 
     /**
@@ -198,13 +223,14 @@ class BootstrapFormExtension extends Twig_Extension
      */
     public function backupFormSettings()
     {
-        $settings = array(
+        $settings = [
             'style'     => $this->style,
+            'sizing'    => $this->sizing,
             'colSize'   => $this->colSize,
             'widgetCol' => $this->widgetCol,
             'labelCol'  => $this->labelCol,
             'simpleCol' => $this->simpleCol,
-        );
+        ];
 
         array_push($this->settingsStack, $settings);
     }
@@ -213,7 +239,7 @@ class BootstrapFormExtension extends Twig_Extension
      * Restore the form settings from the stack.
      *
      * @internal Should only be used at the end of form_end.
-     * @see backupFormSettings
+     * @see      backupFormSettings
      */
     public function restoreFormSettings()
     {
@@ -223,10 +249,11 @@ class BootstrapFormExtension extends Twig_Extension
 
         $settings = array_pop($this->settingsStack);
 
-        $this->style     = $settings['style'];
-        $this->colSize   = $settings['colSize'];
+        $this->style = $settings['style'];
+        $this->sizing = $settings['sizing'];
+        $this->colSize = $settings['colSize'];
         $this->widgetCol = $settings['widgetCol'];
-        $this->labelCol  = $settings['labelCol'];
+        $this->labelCol = $settings['labelCol'];
         $this->simpleCol = $settings['simpleCol'];
     }
 
@@ -238,9 +265,9 @@ class BootstrapFormExtension extends Twig_Extension
      */
     public function formControlStaticFunction($label, $value)
     {
-        return  sprintf(
-            '<div class="form-group"><label class="col-sm-%s control-label">%s</label><div class="col-sm-%s"><p class="form-control-static">%s</p></div></div>',
-            $this->getLabelCol(), $label, $this->getWidgetCol(), $value
+        return sprintf(
+            '<div class="form-group from-group-%s"><label class="col-sm-%s control-label">%s</label><div class="col-sm-%s"><p class="form-control-static">%s</p></div></div>',
+            $this->getSizing(), $this->getLabelCol(), $label, $this->getWidgetCol(), $value
         );
     }
 }

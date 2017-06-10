@@ -32,6 +32,7 @@ class InstallCommandTest extends \PHPUnit_Framework_TestCase
     {
         $this->container = m::mock('Symfony\Component\DependencyInjection\ContainerInterface');
         $this->container->shouldReceive('hasParameter')->andReturn(false);
+        $this->container->shouldReceive('getParameter')->with('kernel.root_dir')->andReturn(__DIR__.'/fixtures/app');
 
         $this->kernel = m::mock('Symfony\Component\HttpKernel\KernelInterface');
         $this->kernel->shouldReceive('getName')->andReturn('app');

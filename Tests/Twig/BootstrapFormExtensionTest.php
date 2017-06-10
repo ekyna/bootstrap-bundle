@@ -44,7 +44,7 @@ class BootstrapFormExtensionTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetFunctions()
     {
-        $this->assertCount(16, $this->extension->getFunctions());
+        $this->assertCount(18, $this->extension->getFunctions());
     }
 
     /**
@@ -55,6 +55,16 @@ class BootstrapFormExtensionTest extends \PHPUnit_Framework_TestCase
     {
         $this->extension->setStyle('inline');
         $this->assertEquals('inline', $this->extension->getStyle());
+    }
+
+    /**
+     * @covers Braincrafted\Bundle\BootstrapBundle\Twig\BootstrapFormExtension::setSizing()
+     * @covers Braincrafted\Bundle\BootstrapBundle\Twig\BootstrapFormExtension::getSizing()
+     */
+    public function testSetSizingGetSizing()
+    {
+        $this->extension->setSizing('sm');
+        $this->assertEquals('sm', $this->extension->getSizing());
     }
 
     /**
@@ -104,6 +114,7 @@ class BootstrapFormExtensionTest extends \PHPUnit_Framework_TestCase
     public function testBackupFormSettingsRestoreFormSettings()
     {
         $this->extension->setStyle('horizontal');
+        $this->extension->setSizing('sm');
         $this->extension->setColSize('sm');
         $this->extension->setWidgetCol(1);
         $this->extension->setLabelCol(2);
@@ -112,6 +123,7 @@ class BootstrapFormExtensionTest extends \PHPUnit_Framework_TestCase
         $this->extension->backupFormSettings();
 
         $this->extension->setStyle('inline');
+        $this->extension->setSizing('lg');
         $this->extension->setColSize('lg');
         $this->extension->setWidgetCol(4);
         $this->extension->setLabelCol(5);
@@ -120,6 +132,7 @@ class BootstrapFormExtensionTest extends \PHPUnit_Framework_TestCase
         $this->extension->restoreFormSettings();
 
         $this->assertEquals('horizontal', $this->extension->getStyle());
+        $this->assertEquals('sm', $this->extension->getSizing());
         $this->assertEquals('sm', $this->extension->getColSize());
         $this->assertEquals(1, $this->extension->getWidgetCol());
         $this->assertEquals(2, $this->extension->getLabelCol());

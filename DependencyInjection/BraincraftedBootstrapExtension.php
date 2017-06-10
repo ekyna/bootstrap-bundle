@@ -13,8 +13,6 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-use Braincrafted\Bundle\BootstrapBundle\DependencyInjection\AsseticConfiguration;
-
 /**
  * BraincraftedBootstrapExtension
  *

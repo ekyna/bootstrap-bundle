@@ -15,6 +15,7 @@
 {% block form_widget_simple %}
     {% spaceless %}
         {% set style = style|default(bootstrap_get_style()) %}
+        {% set sizing = sizing|default(bootstrap_get_sizing()) %}
         {% set col_size = col_size|default(bootstrap_get_col_size()) %}
 
         {% if simple_col is not defined and bootstrap_get_simple_col() %}
@@ -29,6 +30,9 @@
         {% if attr.style is defined and attr.style is not empty %}
             {% set style = attr.style %}
         {% endif %}
+        {% if attr.sizing is defined and attr.sizing is not empty %}
+            {% set sizing = attr.sizing %}
+        {% endif %}
 
         {% if simple_col is defined and simple_col %}
             <div class="col-{{ col_size }}-{{ simple_col }}">
@@ -42,6 +46,10 @@
             {% else %}
                 {% set attr = attr|merge({ 'placeholder': label}) %}
             {% endif %}
+        {% endif %}
+
+        {% if sizing in ['sm', 'lg'] %}
+            {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' input-' ~ sizing)|trim }) %}
         {% endif %}
 
         {% if static_control is defined and static_control == true %}
@@ -128,6 +136,7 @@
 {% block textarea_widget %}
     {% spaceless %}
         {% set col_size = col_size|default(bootstrap_get_col_size()) %}
+        {% set sizing = sizing|default(bootstrap_get_sizing()) %}
 
         {% if attr.simple_col is defined and attr.simple_col is not empty %}
             {% set simple_col = attr.simple_col %}
@@ -135,12 +144,18 @@
         {% if attr.col_size is defined and attr.col_size is not empty %}
             {% set col_size = attr.col_size %}
         {% endif %}
+        {% if attr.sizing is defined and attr.sizing is not empty %}
+            {% set sizing = attr.sizing %}
+        {% endif %}
 
         {% if simple_col is defined %}
             <div class="col-{{ col_size }}-{{ simple_col }}">
         {% endif %}
 
         {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}
+        {% if sizing in ['sm', 'lg'] %}
+            {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' input-' ~ sizing)|trim }) %}
+        {% endif %}
 
         <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 
@@ -200,7 +215,15 @@
 
 {% block choice_widget_collapsed %}
     {% spaceless %}
+        {% set sizing = sizing|default(bootstrap_get_sizing()) %}
+        {% if attr.sizing is defined and attr.sizing is not empty %}
+            {% set sizing = attr.sizing %}
+        {% endif %}
+
         {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control')|trim }) %}
+        {% if sizing in ['sm', 'lg'] %}
+            {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' input-' ~ sizing)|trim }) %}
+        {% endif %}
 
         <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
             {% if placeholder is not none %}
@@ -263,10 +286,10 @@
             {% set widget_col = widget_col|default(bootstrap_get_widget_col()) %}
             {% set label_col = label_col|default(bootstrap_get_label_col()) %}
             {% set class = 'col-' ~ col_size ~ '-' ~ widget_col ~ ' col-' ~ col_size ~ '-offset-' ~ label_col %}
-            <div class="form-group {% if form.vars.errors|length > 0 %} has-error{% endif %}">
+            <div {{ block('form_group_attributes') }}>
             <div class="{{ class }}">
         {% elseif no_form_group is not defined or no_form_group == false %}
-            <div class="form-group{% if form.vars.errors|length > 0 %} has-error{% endif %}">
+            <div {{ block('form_group_attributes') }}>
         {% endif %}
 
         {%set checkboxdata %}
@@ -332,10 +355,10 @@
             {% set widget_col = widget_col|default(bootstrap_get_widget_col()) %}
             {% set label_col = label_col|default(bootstrap_get_label_col()) %}
             {% set class = ' col-'~ col_size ~ '-' ~ widget_col ~ ' col-' ~ col_size ~ '-offset-' ~ label_col %}
-            <div class="form-group {% if form.vars.errors|length > 0 %} has-error{% endif %}">
+            <div {{ block('form_group_attributes') }}>
             <div class="{{ class }}">
         {% elseif no_form_group is not defined or no_form_group == false %}
-            <div class="form-group{% if form.vars.errors|length > 0 %} has-error{% endif %}">
+            <div {{ block('form_group_attributes') }}>
         {% endif %}
 
         {%set radiodata %}
@@ -522,6 +545,13 @@
         {% else %}
             {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' btn btn-'~button_class|default('default'))|trim }) %}
         {% endif %}
+        {% set sizing = sizing|default(bootstrap_get_sizing()) %}
+        {% if attr.sizing is defined and attr.sizing is not empty %}
+            {% set sizing = attr.sizing %}
+        {% endif %}
+        {% if sizing in ['sm', 'lg'] %}
+            {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' btn-' ~ sizing)|trim }) %}
+        {% endif %}
         {% if translation_domain is not same as (false) %}
             {% set label = label|trans({}, translation_domain) %}
         {% endif %}
@@ -554,7 +584,14 @@
 {% endblock %}
 
 {% block bs_static_widget %}
+    {% set sizing = sizing|default(bootstrap_get_sizing()) %}
+    {% if attr.sizing is defined and attr.sizing is not empty %}
+        {% set sizing = attr.sizing %}
+    {% endif %}
     {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' form-control-static')|trim }) %}
+    {% if sizing in ['sm', 'lg'] %}
+        {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' input-' ~ sizing)|trim }) %}
+    {% endif %}
     <p id="{{ id }}" {%- for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>{{ value }}</p>
 {% endblock %}
 
@@ -576,10 +613,14 @@
 
         {% if label is not same as (false) %}
             {% set style = style|default(bootstrap_get_style()) %}
+            {% set sizing = sizing|default(bootstrap_get_sizing()) %}
             {% set label_col = label_col|default(bootstrap_get_label_col()) %}
 
             {% if attr.style is defined and attr.style is not empty %}
                 {% set style = attr.style %}
+            {% endif %}
+            {% if attr.sizing is defined and attr.sizing is not empty %}
+                {% set sizing = attr.sizing %}
             {% endif %}
 
             {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' control-label')|trim }) %}
@@ -587,6 +628,9 @@
                 {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' col-' ~ col_size ~ '-' ~ label_col)|trim }) %}
             {% elseif style == 'inline' %}
                 {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' sr-only')|trim }) %}
+            {% endif %}
+            {% if sizing in ['sm', 'lg'] %}
+                {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' control-label-' ~ sizing)|trim }) %}
             {% endif %}
 
             {% if not compound %}
@@ -644,7 +688,7 @@
         {% set label_col = label_col|default(bootstrap_get_label_col()) %}
         {% set widget_col = widget_col|default(bootstrap_get_widget_col()) %}
 
-        <div class="form-group{% if form.vars.errors|length > 0 %} has-error{% endif %}">
+        <div {{ block('form_group_attributes') }}>
             {% if style == 'horizontal' %}
                 {{ form_label(form) }}
                 <div class="col-{{ col_size }}-{{ widget_col }}">
@@ -671,13 +715,14 @@
         {% endif %}
         {% set input_group = input_group|default({}) %}
         {% if input_group is not empty %}
+            {% set sizing = sizing|default(bootstrap_get_sizing()) %}
+            {% if attr.sizing is defined and attr.sizing is not empty %}
+                {% set sizing = attr.sizing %}
+            {% endif %}
             {% set ig_size_class = '' %}
-            {% if input_group.size is defined and input_group.size == 'large' %}
-                {% set ig_size_class = ' input-group-lg' %}
-            {% endif  %}
-            {% if input_group.size is defined and input_group.size == 'small' %}
-                {% set ig_size_class = ' input-group-sm' %}
-            {% endif  %}
+            {% if sizing in ['sm', 'lg'] %}
+                {% set ig_size_class = ' input-group-' ~ sizing %}
+            {% endif %}
             <div class="input-group{{ ig_size_class }}">
                 {% if input_group.prepend is defined and input_group.prepend is not empty %}
                     <span class="input-group-addon">{{ input_group.prepend|raw|parse_icons }}</span>
@@ -714,6 +759,7 @@
 {% block button_row %}
     {% spaceless %}
         {% set style = style|default(bootstrap_get_style()) %}
+        {% set sizing = sizing|default(bootstrap_get_sizing()) %}
         {% set col_size = col_size|default(bootstrap_get_col_size()) %}
 
         {% if attr.label_col is defined and attr.label_col is not empty %}
@@ -728,11 +774,14 @@
         {% if attr.style is defined and attr.style is not empty %}
             {% set style = attr.style %}
         {% endif %}
+        {% if attr.sizing is defined and attr.sizing is not empty %}
+            {% set sizing = attr.sizing %}
+        {% endif %}
 
         {% set label_col = label_col|default(bootstrap_get_label_col()) %}
         {% set widget_col = widget_col|default(bootstrap_get_widget_col()) %}
 
-        <div class="form-group">
+        <div class="form-group{% if sizing in ['sm', 'lg'] %} input-{{ sizing }}{% endif %}">
             {% if style == 'horizontal' %}
             <div class="col-{{ col_size }}-offset-{{ label_col }} col-{{ col_size }}-{{ widget_col }}">
                 {% endif %}
@@ -908,6 +957,18 @@
         {% endfor %}
     {% endspaceless %}
 {% endblock form_rows %}
+
+{% block form_group_attributes %}
+    {% spaceless %}
+        {% set sizing = sizing|default(bootstrap_get_sizing()) %}
+        {% if attr.sizing is defined and attr.sizing is not empty %}
+            {% set sizing = attr.sizing %}
+        {% endif %}
+        class="form-group
+        {%- if sizing in ['sm', 'lg'] %} form-group-{{ sizing }}{% endif -%}
+        {%- if form.vars.errors|length > 0 %} has-error{% endif %}"
+    {% endspaceless %}
+{% endblock form_group_attributes %}
 
 {% block widget_attributes %}
     {% spaceless %}
