@@ -89,6 +89,16 @@ class BootstrapFormExtension extends Twig_Extension
     /**
      * {@inheritdoc}
      */
+    public function getFilters()
+    {
+        return [
+            new \Twig_SimpleFilter('json_encode_data', [$this, 'jsonEncodeDataAttribute']),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getName()
     {
         return 'braincrafted_bootstrap_form';
@@ -269,5 +279,27 @@ class BootstrapFormExtension extends Twig_Extension
             '<div class="form-group from-group-%s"><label class="col-sm-%s control-label">%s</label><div class="col-sm-%s"><p class="form-control-static">%s</p></div></div>',
             $this->getSizing(), $this->getLabelCol(), $label, $this->getWidgetCol(), $value
         );
+    }
+
+    /**
+     * Json encode the given data for html data-* attribute.
+     *
+     * @param $data
+     *
+     * @return string
+     */
+    public function jsonEncodeDataAttribute($data)
+    {
+        $opts = JSON_HEX_APOS | JSON_PRESERVE_ZERO_FRACTION;
+
+        if (empty($data)) {
+            $opts = $opts | JSON_FORCE_OBJECT;
+        }
+
+        if (false === $json = json_encode($data, $opts)) {
+            throw new \RuntimeException(json_last_error_msg());
+        }
+
+        return $json;
     }
 }

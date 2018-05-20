@@ -256,7 +256,7 @@
                 <option value="{{ choice.value }}"
                         {% if choice is selectedchoice(value) %} selected="selected"{% endif %}
                         {{ block('widget_container_attributes') }}>
-                    {{ choice_translation_domain is defined ? (choice_translation_domain is same as (false) ? choice.label : choice.label|trans({}, choice_translation_domain)) : choice.label|trans({}, translation_domain) }}
+                    {{ choice_translation_domain is defined ? (choice_translation_domain is same as (false) ? choice.label : choice.label|trans({}, choice_translation_domain)) : choice.label|trans({}, translation_domain)|raw }}
                 </option>
             {% endif %}
         {% endfor %}
@@ -645,7 +645,13 @@
             {% if translation_domain is not same as (false) %}
                 {% set label = label|trans({}, translation_domain) %}
             {% endif %}
-            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>{{ label|raw }}</label>
+            <{{ element|default('label') }}{% if label_attr %}{% with { attr: label_attr } %}{{ block('attributes') }}{% endwith %}{% endif %}>
+            {%- if translation_domain is same as(false) -%}
+                {{- label|raw -}}
+            {%- else -%}
+                {{- label|trans({}, translation_domain)|raw -}}
+            {%- endif -%}
+            </{{ element|default('label') }}>
         {% endif %}
     {% endspaceless %}
 {% endblock form_label %}
@@ -816,6 +822,7 @@
 {% block form_start %}
     {% spaceless %}
         {{ bootstrap_backup_form_settings() }}
+        {%- do form.setMethodRendered() -%}
         {% set method = method|upper %}
         {% if method in ["GET", "POST"] %}
             {% set form_method = method %}
@@ -852,7 +859,7 @@
             {% set attr = attr|merge({ 'role': 'form' }) %}
         {% endif %}
 
-        <form  name="{{ form.vars.name }}" method="{{ form_method|lower }}" action="{{ action }}"{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}{% if multipart %} enctype="multipart/form-data"{% endif %}>
+        <form{% if name != '' %} name="{{ name }}"{% endif %} method="{{ form_method|lower }}"{% if action != '' %} action="{{ action }}"{% endif %}{{ block('attributes') }}{% if multipart %} enctype="multipart/form-data"{% endif %}>
         {% if form_method != method %}
             <input type="hidden" name="_method" value="{{ method }}" />
         {% endif %}
@@ -929,6 +936,20 @@
                 {{ form_row(child) }}
             {% endif %}
         {% endfor %}
+
+        {% if not form.methodRendered and form is rootform %}
+            {%- do form.setMethodRendered() -%}
+            {% set method = method|upper %}
+            {%- if method in ["GET", "POST"] -%}
+                {% set form_method = method %}
+            {%- else -%}
+                {% set form_method = "POST" %}
+            {%- endif -%}
+
+            {%- if form_method != method -%}
+                <input type="hidden" name="_method" value="{{ method }}" />
+            {%- endif -%}
+        {% endif -%}
     {% endspaceless %}
 {% endblock form_rest %}
 
@@ -970,13 +991,6 @@
     {% endspaceless %}
 {% endblock form_group_attributes %}
 
-{% block widget_attributes %}
-    {% spaceless %}
-        id="{{ id }}" name="{{ full_name }}" {% if disabled %} disabled="disabled"{% endif %}{% if required %} required="required"{% endif %}
-        {% for attrname, attrvalue in attr %}{% if attrname in ['placeholder', 'title'] %}{{ attrname }}="{{ attrvalue|trans({}, translation_domain) }}" {% elseif attrname in ['input_group'] %}{% else %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}
-    {% endspaceless %}
-{% endblock widget_attributes %}
-
 {% block widget_container_attributes %}
     {% spaceless %}
         {% if attr.style is defined and (attr.style == 'inline' or attr.style == 'horizontal') %}
@@ -984,11 +998,22 @@
             {% set attr = attr|merge({ 'style': null }) %}
         {% endif %}
         {% if id is not empty %}id="{{ id }}" {% endif %}
-        {% for attrname, attrvalue in attr %}{% if attrvalue is not null and (attrvalue is not iterable) %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}
+        {{ block('attributes') }}
     {% endspaceless %}
 {% endblock widget_container_attributes %}
 
-{% block button_attributes -%}
-    id="{{ id }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif %}
-    {%- for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
-{% endblock button_attributes %}
+{% block attributes -%}
+    {%- for attrname, attrvalue in attr -%}
+        {{- " " -}}
+        {%- if attrname in ['placeholder', 'title'] -%}
+            {{- attrname }}="{{ translation_domain is same as(false) ? attrvalue : attrvalue|trans({}, translation_domain) }}"
+        {%- elseif attrname in ['input_group'] -%}
+        {%- elseif attrvalue is iterable -%}
+            {{- attrname }}='{{ attrvalue|json_encode_data|raw }}'
+        {%- elseif attrvalue is same as(true) -%}
+            {{- attrname }}="{{ attrname }}"
+        {%- elseif attrvalue is not same as(false) -%}
+            {{- attrname }}="{{ attrvalue }}"
+        {%- endif -%}
+    {%- endfor -%}
+{%- endblock attributes -%}
